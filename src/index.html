@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DBI Backend</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <rect x="2" y="6" width="24" height="16" rx="3" stroke="currentColor" stroke-width="2"/>
+            <rect x="6" y="10" width="6" height="8" rx="1" fill="currentColor" opacity="0.3"/>
+            <rect x="16" y="10" width="6" height="8" rx="1" fill="currentColor" opacity="0.3"/>
+            <line x1="14" y1="2" x2="14" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="header-title">
+          <h1>DBI Backend</h1>
+          <span class="header-subtitle" data-i18n="header.subtitle">Switch USB Installer</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="lang-toggle" id="langToggle" title="Switch language">EN</button>
+        <div class="status-indicator" id="statusIndicator">
+          <span class="status-dot"></span>
+          <span class="status-text" id="statusText" data-i18n="status.disconnected">Disconnected</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Tip Banner -->
+    <div class="tip-banner" id="tipBanner">
+      <div class="tip-icon">i</div>
+      <div class="tip-content">
+        <strong data-i18n="tip.title">Before you start:</strong>
+        <span data-i18n="tip.content">Open DBI on your Switch, select "Run MTP responder" or "Backend", then connect USB cable.</span>
+      </div>
+      <button class="tip-close" id="tipClose">&times;</button>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main">
+      <!-- File List Panel -->
+      <section class="panel file-panel">
+        <div class="panel-header">
+          <h2 data-i18n="panel.files">Files</h2>
+          <span class="file-count" id="fileCount">0 file(s)</span>
+        </div>
+
+        <div class="toolbar">
+          <button class="btn btn-secondary" id="btnAddFolder">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4c0-.6.4-1 1-1h3.6l1.2 1.5H13c.6 0 1 .4 1 1V12c0 .6-.4 1-1 1H3c-.6 0-1-.4-1-1V4z" stroke="currentColor" stroke-width="1.5"/></svg>
+            <span data-i18n="btn.addFolder">Add Folder</span>
+          </button>
+          <button class="btn btn-secondary" id="btnAddFiles">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 2h5l3 3v9c0 .6-.4 1-1 1H4c-.6 0-1-.4-1-1V3c0-.6.4-1 1-1z" stroke="currentColor" stroke-width="1.5"/><path d="M6 9h4M8 7v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <span data-i18n="btn.addFiles">Add Files</span>
+          </button>
+          <button class="btn btn-ghost" id="btnClear">
+            <span data-i18n="btn.clearAll">Clear All</span>
+          </button>
+        </div>
+
+        <div class="file-list-container" id="dropZone">
+          <div class="file-list-empty" id="fileListEmpty">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" opacity="0.3">
+              <rect x="8" y="12" width="32" height="24" rx="4" stroke="currentColor" stroke-width="2" stroke-dasharray="4 3"/>
+              <path d="M20 24l4 4 4-4M24 28V18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <p data-i18n="fileList.empty">Drop NSP / NSZ files here</p>
+            <span data-i18n="fileList.emptyHint">or use the buttons above</span>
+          </div>
+          <ul class="file-list" id="fileList"></ul>
+        </div>
+      </section>
+
+      <!-- Log Panel -->
+      <section class="panel log-panel">
+        <div class="panel-header">
+          <h2 data-i18n="panel.log">Log</h2>
+          <button class="btn btn-ghost btn-sm" id="btnClearLog" data-i18n="btn.clearLog">Clear</button>
+        </div>
+        <div class="log-container" id="logContainer">
+          <div class="log-line log-info" id="logReady"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer Action Bar -->
+    <footer class="action-bar">
+      <div class="action-info">
+        <span id="transferInfo"></span>
+      </div>
+      <button class="btn btn-primary btn-lg" id="btnStart" disabled>
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="5,3 15,9 5,15" fill="currentColor"/></svg>
+        <span id="btnStartText" data-i18n="btn.startServer">Start Server</span>
+      </button>
+    </footer>
+  </div>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
