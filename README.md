@@ -75,6 +75,10 @@ pnpm build
 - **框架**: [Tauri v2](https://v2.tauri.app/)
 - **协议**: DBI USB 自定义协议（16 字节头部，批量传输端点）
 
+### 致谢
+
+本项目基于 [GuangLun2000/DBI-backend-for-switch](https://github.com/GuangLun2000/DBI-backend-for-switch) 的 Python 脚本重写为 Tauri 原生桌面应用。
+
 ### 许可证
 
 MIT
@@ -151,6 +155,10 @@ Build artifacts are located in `src-tauri/target/release/bundle/`.
 - **Backend**: Rust + [nusb](https://github.com/kevinmehall/nusb) (pure Rust USB library)
 - **Framework**: [Tauri v2](https://v2.tauri.app/)
 - **Protocol**: DBI USB custom protocol (16-byte headers, bulk transfer endpoints)
+
+### Acknowledgments
+
+This project is a Tauri native desktop rewrite based on the Python script from [GuangLun2000/DBI-backend-for-switch](https://github.com/GuangLun2000/DBI-backend-for-switch).
 
 ### License
 
