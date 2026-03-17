@@ -3,6 +3,7 @@
 [中文](#中文) | [English](#english)
 
 ---
+<img width="890" height="646" alt="image" src="https://github.com/user-attachments/assets/ca06b77d-74ea-4b8d-90bd-b4eaf2b0c8a2" />
 
 ## 中文
 
