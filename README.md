@@ -44,7 +44,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/<your-username>/dbi-backend.git
+git clone https://github.com/lemonteaau/dbi-backend.git
 cd dbi-backend
 
 # 安装前端依赖
@@ -121,7 +121,7 @@ Download the installer for your platform from the [Releases](../../releases) pag
 
 ```bash
 # Clone the repo
-git clone https://github.com/<your-username>/dbi-backend.git
+git clone https://github.com/lemonteaau/dbi-backend.git
 cd dbi-backend
 
 # Install frontend dependencies
