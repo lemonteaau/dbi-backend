@@ -9,7 +9,32 @@ permissions:
   contents: write
 
 jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: DBI Backend ${{ github.ref_name }}
+          body: |
+            See the [README](https://github.com/${{ github.repository }}#readme) for usage instructions.
+
+            ## Downloads
+
+            | Platform | File |
+            |----------|------|
+            | macOS (Apple Silicon) | `DBI-Backend-${{ github.ref_name }}-macOS-arm64.dmg` |
+            | macOS (Intel) | `DBI-Backend-${{ github.ref_name }}-macOS-x64.dmg` |
+            | Windows | `DBI-Backend-${{ github.ref_name }}-Windows-x64-setup.exe` |
+            | Windows (MSI) | `DBI-Backend-${{ github.ref_name }}-Windows-x64.msi` |
+            | Linux (deb) | `DBI-Backend-${{ github.ref_name }}-Linux-x64.deb` |
+            | Linux (AppImage) | `DBI-Backend-${{ github.ref_name }}-Linux-x64.AppImage` |
+            | Linux (rpm) | `DBI-Backend-${{ github.ref_name }}-Linux-x64.rpm` |
+          draft: false
+          prerelease: false
+
   build:
+    needs: create-release
     strategy:
       fail-fast: false
       matrix:
@@ -55,7 +80,6 @@ jobs:
           node-version: 20
           cache: pnpm
 
-      # Linux-only: install system dependencies required by Tauri
       - name: Install Linux dependencies
         if: matrix.platform == 'ubuntu-22.04'
         run: |
@@ -72,22 +96,71 @@ jobs:
         run: pnpm install
 
       - name: Build Tauri app
-        uses: tauri-apps/tauri-action@v0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tagName: ${{ github.ref_name }}
-          releaseName: DBI Backend ${{ github.ref_name }}
-          releaseBody: |
-            See the [README](https://github.com/${{ github.repository }}#readme) for usage instructions.
+        run: pnpm tauri build --target ${{ matrix.target }}
 
-            ## Downloads
-            | Platform | File |
-            |----------|------|
-            | macOS (Apple Silicon) | `.dmg` (arm64) |
-            | macOS (Intel) | `.dmg` (x64) |
-            | Windows | `.msi` / `.exe` |
-            | Linux | `.deb` / `.AppImage` |
-          releaseDraft: false
-          prerelease: false
-          args: --target ${{ matrix.target }}
+      - name: Rename & upload artifacts (macOS)
+        if: startsWith(matrix.platform, 'macos')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          BUNDLE_DIR="src-tauri/target/${{ matrix.target }}/release/bundle"
+
+          # .dmg
+          DMG=$(find "$BUNDLE_DIR/dmg" -name "*.dmg" | head -1)
+          if [ -n "$DMG" ]; then
+            cp "$DMG" "DBI-Backend-${VERSION}-${{ matrix.label }}.dmg"
+            gh release upload "$VERSION" "DBI-Backend-${VERSION}-${{ matrix.label }}.dmg" --clobber
+          fi
+
+      - name: Rename & upload artifacts (Windows)
+        if: matrix.platform == 'windows-latest'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: pwsh
+        run: |
+          $VERSION = "${{ github.ref_name }}"
+          $BUNDLE_DIR = "src-tauri/target/${{ matrix.target }}/release/bundle"
+
+          # .exe (NSIS installer)
+          $exe = Get-ChildItem "$BUNDLE_DIR/nsis/*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($exe) {
+            Copy-Item $exe.FullName "DBI-Backend-${VERSION}-${{ matrix.label }}-setup.exe"
+            gh release upload "$VERSION" "DBI-Backend-${VERSION}-${{ matrix.label }}-setup.exe" --clobber
+          }
+
+          # .msi
+          $msi = Get-ChildItem "$BUNDLE_DIR/msi/*.msi" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($msi) {
+            Copy-Item $msi.FullName "DBI-Backend-${VERSION}-${{ matrix.label }}.msi"
+            gh release upload "$VERSION" "DBI-Backend-${VERSION}-${{ matrix.label }}.msi" --clobber
+          }
+
+      - name: Rename & upload artifacts (Linux)
+        if: matrix.platform == 'ubuntu-22.04'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          BUNDLE_DIR="src-tauri/target/${{ matrix.target }}/release/bundle"
+
+          # .deb
+          DEB=$(find "$BUNDLE_DIR/deb" -name "*.deb" | head -1)
+          if [ -n "$DEB" ]; then
+            cp "$DEB" "DBI-Backend-${VERSION}-${{ matrix.label }}.deb"
+            gh release upload "$VERSION" "DBI-Backend-${VERSION}-${{ matrix.label }}.deb" --clobber
+          fi
+
+          # .AppImage
+          APPIMAGE=$(find "$BUNDLE_DIR/appimage" -name "*.AppImage" | head -1)
+          if [ -n "$APPIMAGE" ]; then
+            cp "$APPIMAGE" "DBI-Backend-${VERSION}-${{ matrix.label }}.AppImage"
+            gh release upload "$VERSION" "DBI-Backend-${VERSION}-${{ matrix.label }}.AppImage" --clobber
+          fi
+
+          # .rpm
+          RPM=$(find "$BUNDLE_DIR/rpm" -name "*.rpm" | head -1)
+          if [ -n "$RPM" ]; then
+            cp "$RPM" "DBI-Backend-${VERSION}-${{ matrix.label }}.rpm"
+            gh release upload "$VERSION" "DBI-Backend-${VERSION}-${{ matrix.label }}.rpm" --clobber
+          fi
