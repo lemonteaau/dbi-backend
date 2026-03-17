@@ -34,6 +34,11 @@
 | Windows | `.msi` / `.exe` |
 | Linux | `.deb` / `.AppImage` |
 
+> **macOS 用户注意：** 由于应用未经 Apple 签名，首次打开可能提示"已损坏"。请在终端执行以下命令后重新打开：
+> ```bash
+> xattr -cr /Applications/DBI\ Backend.app
+> ```
+
 ### 从源码构建
 
 **依赖：**
@@ -114,6 +119,11 @@ Download the installer for your platform from the [Releases](../../releases) pag
 | macOS | `.dmg` |
 | Windows | `.msi` / `.exe` |
 | Linux | `.deb` / `.AppImage` |
+
+> **macOS users:** The app is not signed with an Apple developer certificate. If macOS says the app "is damaged and can't be opened", run this in Terminal then reopen:
+> ```bash
+> xattr -cr /Applications/DBI\ Backend.app
+> ```
 
 ### Building from Source
 

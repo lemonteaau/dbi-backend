@@ -30,6 +30,11 @@ jobs:
             | Linux (deb) | `DBI-Backend-${{ github.ref_name }}-Linux-x64.deb` |
             | Linux (AppImage) | `DBI-Backend-${{ github.ref_name }}-Linux-x64.AppImage` |
             | Linux (rpm) | `DBI-Backend-${{ github.ref_name }}-Linux-x64.rpm` |
+
+            > **macOS users:** The app is not signed with an Apple developer certificate. If macOS says the app "is damaged and can't be opened", run this in Terminal then reopen:
+            > ```
+            > xattr -cr /Applications/DBI\ Backend.app
+            > ```
           draft: false
           prerelease: false
 
