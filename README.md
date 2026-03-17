@@ -21,7 +21,7 @@
 ### 使用前提
 
 1. Switch 上已安装 [DBI](https://github.com/rashevskyv/dbi) 自制应用
-2. 在 Switch 上打开 DBI，选择 **"Run MTP responder"** 或 **"Backend"**
+2. 在 Switch 上打开 DBI，选择 **"从DBIbackend安装"**
 3. 通过 USB 线缆连接 Switch 到电脑
 
 ### 安装方式
@@ -61,7 +61,7 @@ pnpm build
 
 ### 使用方法
 
-1. 在 Switch 上打开 DBI，选择 "Backend" 模式
+1. 在 Switch 上打开 DBI，选择 "从DBIbackend安装"
 2. 通过 USB 连接 Switch 到电脑
 3. 打开 DBI Backend 应用
 4. 拖放或点击按钮添加游戏文件
@@ -98,7 +98,7 @@ A Tauri v2 desktop application for installing Nintendo Switch game files (NSP/NS
 ### Prerequisites
 
 1. [DBI](https://github.com/rashevskyv/dbi) homebrew installed on your Switch
-2. Open DBI on Switch, select **"Run MTP responder"** or **"Backend"**
+2. Open DBI on Switch, select **"Install from DBIbackend"**
 3. Connect Switch to your computer via USB cable
 
 ### Installation
@@ -138,7 +138,7 @@ Build artifacts are located in `src-tauri/target/release/bundle/`.
 
 ### Usage
 
-1. Open DBI on your Switch, select "Backend" mode
+1. Open DBI on your Switch, select "Install from DBIbackend"
 2. Connect Switch to your computer via USB
 3. Launch the DBI Backend app
 4. Drag-and-drop or click buttons to add game files
