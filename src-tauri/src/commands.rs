@@ -5,6 +5,7 @@
 use std::collections::HashMap;
 use std::fs;
 use std::path::PathBuf;
+use std::process::Command;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 
@@ -30,6 +31,7 @@ pub struct FileInfo {
 
 /// Valid file extensions for Switch installable files.
 const VALID_EXTENSIONS: &[&str] = &["nsp", "nsz", "xci", "xcz"];
+const PROJECT_GITHUB_URL: &str = "https://github.com/lemonteaau/dbi-backend";
 
 fn is_valid_file(path: &PathBuf) -> bool {
     path.extension()
@@ -48,6 +50,12 @@ fn add_file_to_map(files: &mut HashMap<String, PathBuf>, path: PathBuf) {
 }
 
 // ===== Tauri Commands =====
+
+/// Open the project repository in the system browser.
+#[tauri::command]
+pub fn open_project_github() -> Result<(), String> {
+    open_external_url(PROJECT_GITHUB_URL)
+}
 
 /// Add individual files by their full paths.
 #[tauri::command]
@@ -84,6 +92,33 @@ fn scan_directory(dir: &PathBuf, files: &mut HashMap<String, PathBuf>) {
             }
         }
     }
+}
+
+#[cfg(target_os = "macos")]
+fn open_external_url(url: &str) -> Result<(), String> {
+    Command::new("open")
+        .arg(url)
+        .spawn()
+        .map(|_| ())
+        .map_err(|e| e.to_string())
+}
+
+#[cfg(target_os = "windows")]
+fn open_external_url(url: &str) -> Result<(), String> {
+    Command::new("cmd")
+        .args(["/C", "start", "", url])
+        .spawn()
+        .map(|_| ())
+        .map_err(|e| e.to_string())
+}
+
+#[cfg(all(unix, not(target_os = "macos")))]
+fn open_external_url(url: &str) -> Result<(), String> {
+    Command::new("xdg-open")
+        .arg(url)
+        .spawn()
+        .map(|_| ())
+        .map_err(|e| e.to_string())
 }
 
 /// Add paths that can be either files or folders (used by drag-and-drop).

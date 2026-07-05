@@ -22,6 +22,7 @@ pub fn run() {
             commands::add_paths,
             commands::clear_files,
             commands::get_file_list,
+            commands::open_project_github,
             commands::remove_file,
             commands::start_server,
             commands::stop_server,

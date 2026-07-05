@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+promo/
 
 # Rust build artifacts
 src-tauri/target/

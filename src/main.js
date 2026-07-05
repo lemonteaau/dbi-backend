@@ -23,6 +23,7 @@ const btnStart = document.getElementById('btnStart');
 const btnStartText = document.getElementById('btnStartText');
 const langToggle = document.getElementById('langToggle');
 const logReady = document.getElementById('logReady');
+const projectLink = document.getElementById('projectLink');
 
 let serverRunning = false;
 let isConnected = false;
@@ -68,6 +69,15 @@ function updateDynamicTexts() {
 }
 
 langToggle.addEventListener('click', switchLanguage);
+
+projectLink.addEventListener('click', async (event) => {
+  event.preventDefault();
+  try {
+    await invoke('open_project_github');
+  } catch (e) {
+    window.open(projectLink.href, '_blank', 'noopener,noreferrer');
+  }
+});
 
 // ===== Event Listeners from Rust backend =====
 
