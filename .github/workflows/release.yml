@@ -28,7 +28,7 @@ jobs:
             | Windows | `DBI-Backend-${{ github.ref_name }}-Windows-x64-setup.exe` |
             | Windows (MSI) | `DBI-Backend-${{ github.ref_name }}-Windows-x64.msi` |
             | Linux (deb) | `DBI-Backend-${{ github.ref_name }}-Linux-x64.deb` |
-            | Linux (AppImage) | `DBI-Backend-${{ github.ref_name }}-Linux-x64.AppImage` |
+            | Linux (AppImage) | `DBI-Backend-${{ github.ref_name }}-x86_64.AppImage` |
             | Linux (rpm) | `DBI-Backend-${{ github.ref_name }}-Linux-x64.rpm` |
 
             > **macOS users:** The app is not signed with an Apple developer certificate. If macOS says the app "is damaged and can't be opened", run this in Terminal then reopen:
@@ -95,13 +95,27 @@ jobs:
             librsvg2-dev \
             patchelf \
             libusb-1.0-0-dev \
-            libudev-dev
+            libudev-dev \
+            desktop-file-utils
 
       - name: Install frontend dependencies
         run: pnpm install
 
       - name: Build Tauri app
         run: pnpm tauri build --target ${{ matrix.target }}
+
+      # The AppImage catalog (appimage.github.io) rejects AppImages whose
+      # .DirIcon is missing or a dangling symlink, so fail before uploading.
+      - name: Verify AppImage layout
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          APPIMAGE=$(find "src-tauri/target/${{ matrix.target }}/release/bundle/appimage" -name "*.AppImage" | head -1)
+          chmod +x "$APPIMAGE"
+          "$APPIMAGE" --appimage-extract > /dev/null
+          test -e squashfs-root/.DirIcon
+          test -x squashfs-root/AppRun
+          desktop-file-validate squashfs-root/*.desktop
+          rm -rf squashfs-root
 
       - name: Rename & upload artifacts (macOS)
         if: startsWith(matrix.platform, 'macos')
@@ -156,11 +170,11 @@ jobs:
             gh release upload "$VERSION" "DBI-Backend-${VERSION}-${{ matrix.label }}.deb" --clobber
           fi
 
-          # .AppImage
+          # .AppImage (named per AppImage convention: no "Linux", arch as x86_64)
           APPIMAGE=$(find "$BUNDLE_DIR/appimage" -name "*.AppImage" | head -1)
           if [ -n "$APPIMAGE" ]; then
-            cp "$APPIMAGE" "DBI-Backend-${VERSION}-${{ matrix.label }}.AppImage"
-            gh release upload "$VERSION" "DBI-Backend-${VERSION}-${{ matrix.label }}.AppImage" --clobber
+            cp "$APPIMAGE" "DBI-Backend-${VERSION}-x86_64.AppImage"
+            gh release upload "$VERSION" "DBI-Backend-${VERSION}-x86_64.AppImage" --clobber
           fi
 
           # .rpm

@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/nicoverbruggen/tauri-v2-schema/refs/heads/main/schema.json",
   "productName": "DBI Backend",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "identifier": "com.dbi-backend.desktop",
   "build": {
     "beforeDevCommand": "",
@@ -29,6 +29,8 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "category": "Utility",
+    "shortDescription": "Install Nintendo Switch game files over USB via DBI",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
