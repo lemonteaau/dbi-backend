@@ -182,6 +182,12 @@ fn process_list_command(
         &format!("Sent file list ({} files)", file_list.len()),
         "success",
     );
+
+    // The Switch now shows the list and waits for the user to pick files;
+    // let the frontend show a localized "continue on the Switch" hint.
+    if nsp_len > 0 {
+        let _ = app.emit("file-list-sent", ());
+    }
     Ok(())
 }
 

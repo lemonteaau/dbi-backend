@@ -71,8 +71,11 @@ pnpm build
 2. 通过 USB 连接 Switch 到电脑
 3. 打开 DBI Backend 应用
 4. 拖放或点击按钮添加游戏文件
-5. 点击 **"启动服务"** 开始传输
-6. 等待传输完成，Switch 端会自动安装
+5. 点击 **"启动服务"**，日志出现 `Sent file list` 即表示 Switch 已收到文件列表
+6. 在 Switch 的 DBI 里勾选要安装的游戏并开始安装（电脑端不会自动开始传输）
+7. 等待传输完成，Switch 端会自动安装
+
+> 本工具只是 Switch 上 DBI 的电脑端，不是通用的传文件工具，不能向安卓手机或移动硬盘传输文件。
 
 ### 技术栈
 
@@ -157,8 +160,11 @@ Build artifacts are located in `src-tauri/target/release/bundle/`.
 2. Connect Switch to your computer via USB
 3. Launch the DBI Backend app
 4. Drag-and-drop or click buttons to add game files
-5. Click **"Start Server"** to begin transferring
-6. Wait for the transfer to complete — DBI will install automatically on the Switch
+5. Click **"Start Server"** — once the log shows `Sent file list`, the Switch has received the file list
+6. In DBI on your Switch, select the games to install and start the installation (the desktop app does not start the transfer by itself)
+7. Wait for the transfer to complete — DBI will install automatically on the Switch
+
+> This tool is only the desktop side of DBI on the Switch. It is not a general-purpose file transfer tool and cannot send files to Android phones or external drives.
 
 ### Tech Stack
 

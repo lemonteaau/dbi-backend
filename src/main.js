@@ -91,6 +91,11 @@ listen('connection-status', (event) => {
   statusText.textContent = isConnected ? t('status.connected') : t('status.disconnected');
 });
 
+listen('file-list-sent', () => {
+  appendLog(t('log.selectOnSwitch'), 'warn');
+  transferInfo.textContent = t('info.waitingForSwitch');
+});
+
 listen('transfer-progress', (event) => {
   const { file, bytes_sent, total_bytes } = event.payload;
   const pct = total_bytes > 0 ? ((bytes_sent / total_bytes) * 100).toFixed(1) : 0;

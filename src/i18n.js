@@ -28,6 +28,8 @@ const translations = {
     'log.ready': '就绪。添加文件后启动服务。',
     'log.dropped': '已拖入 {n} 个项目',
     'log.stopping': '正在停止服务...',
+    'log.selectOnSwitch': '下一步：请在 Switch 的 DBI 里勾选要安装的游戏并开始安装，之后才会开始传输。',
+    'info.waitingForSwitch': '等待在 Switch 上选择游戏并开始安装…',
   },
   en: {
     'header.subtitle': 'Switch USB Installer',
@@ -51,6 +53,8 @@ const translations = {
     'log.ready': 'Ready. Add files and start the server.',
     'log.dropped': 'Dropped {n} item(s)',
     'log.stopping': 'Stopping server...',
+    'log.selectOnSwitch': 'Next: in DBI on your Switch, select the games to install and start the installation. The transfer begins after that.',
+    'info.waitingForSwitch': 'Waiting for you to select games and start the install on the Switch…',
   },
 };
 
