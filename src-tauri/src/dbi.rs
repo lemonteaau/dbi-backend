@@ -10,6 +10,7 @@ use std::io::{Read, Seek, SeekFrom, Write};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
+use std::time::{Duration, Instant};
 
 use nusb::transfer::{Bulk, In, Out};
 use nusb::MaybeFuture;
@@ -39,6 +40,13 @@ const EP_IN: u8 = 0x81;
 /// Buffer size for the endpoint reader/writer (slightly larger than our chunk).
 const EP_BUF_SIZE: usize = BUFFER_SEGMENT_DATA_SIZE + 4096;
 
+/// How often a blocked header read wakes up to check the stop flag.
+const HEADER_POLL_INTERVAL: Duration = Duration::from_millis(500);
+
+/// DBI sends its first command right after entering backend mode, so a
+/// silent device after this long is most likely not DBI's backend mode.
+const NO_DBI_HINT_AFTER: Duration = Duration::from_secs(5);
+
 // ===== Helper Functions =====
 
 /// Build a 16-byte DBI command header.
@@ -65,6 +73,12 @@ fn emit_connection(app: &AppHandle, connected: bool) {
         "connection-status",
         serde_json::json!({ "connected": connected }),
     );
+}
+
+/// Emit a hint for the frontend to show as a localized log line.
+/// `key` maps to `hint.<key>` in the frontend translations.
+fn emit_hint(app: &AppHandle, key: &str) {
+    let _ = app.emit("hint", serde_json::json!({ "key": key }));
 }
 
 /// Emit transfer progress to the frontend.
@@ -115,6 +129,59 @@ impl UsbIo {
             .read_exact(&mut buf)
             .map_err(|e| format!("USB read error: {e}"))?;
         Ok(buf)
+    }
+}
+
+/// Outcome of waiting for a command header.
+enum HeaderRead {
+    Header([u8; 16]),
+    /// The user clicked Stop while we were waiting.
+    Stopped,
+    /// Nothing arrived within the idle limit.
+    Idle,
+}
+
+impl UsbIo {
+    /// Wait for a 16-byte command header, waking up periodically so that
+    /// Stop works while the Switch is idle. Returns `Idle` once `idle_limit`
+    /// passes without any data.
+    fn read_header(
+        &mut self,
+        stop: &AtomicBool,
+        idle_limit: Duration,
+    ) -> Result<HeaderRead, String> {
+        self.reader.set_read_timeout(HEADER_POLL_INTERVAL);
+        let result = self.read_header_inner(stop, idle_limit);
+        self.reader.set_read_timeout(Duration::MAX);
+        result
+    }
+
+    fn read_header_inner(
+        &mut self,
+        stop: &AtomicBool,
+        idle_limit: Duration,
+    ) -> Result<HeaderRead, String> {
+        let started = Instant::now();
+        let mut buf = [0u8; 16];
+        let mut filled = 0;
+
+        while filled < buf.len() {
+            match self.reader.read(&mut buf[filled..]) {
+                Ok(0) => return Err("USB read error: endpoint closed".into()),
+                Ok(n) => filled += n,
+                // A timed-out wait leaves the transfer pending, so no data is lost.
+                Err(e) if e.kind() == std::io::ErrorKind::TimedOut => {
+                    if stop.load(Ordering::Relaxed) {
+                        return Ok(HeaderRead::Stopped);
+                    }
+                    if filled == 0 && started.elapsed() >= idle_limit {
+                        return Ok(HeaderRead::Idle);
+                    }
+                }
+                Err(e) => return Err(format!("USB read error: {e}")),
+            }
+        }
+        Ok(HeaderRead::Header(buf))
     }
 }
 
@@ -402,8 +469,13 @@ pub fn run_server(
             writer: ep_out.writer(EP_BUF_SIZE),
         };
 
-        emit_log(&app, "Switch connected!", "success");
-        emit_connection(&app, true);
+        // The USB device is also used by other homebrew (e.g. Tinfoil, Goldleaf),
+        // so only report "connected" once DBI itself sends a command.
+        emit_log(&app, "Switch USB device found, waiting for DBI...", "info");
+
+        let mut dbi_seen = false;
+        let mut hinted_idle = false;
+        let mut hinted_foreign = false;
 
         // ---- Command Loop ----
         loop {
@@ -414,8 +486,20 @@ pub fn run_server(
                 return StopReason::UserStopped;
             }
 
-            let header = match usb.read_exact(16) {
-                Ok(h) => h,
+            let idle_limit = if dbi_seen || hinted_idle {
+                Duration::MAX
+            } else {
+                NO_DBI_HINT_AFTER
+            };
+
+            let header = match usb.read_header(&stop_flag, idle_limit) {
+                Ok(HeaderRead::Header(h)) => h,
+                Ok(HeaderRead::Stopped) => continue, // Handled by the stop check above
+                Ok(HeaderRead::Idle) => {
+                    emit_hint(&app, "noDbiCommand");
+                    hinted_idle = true;
+                    continue;
+                }
                 Err(e) => {
                     emit_log(&app, &format!("Connection lost: {e}"), "warn");
                     emit_connection(&app, false);
@@ -423,8 +507,18 @@ pub fn run_server(
                 }
             };
 
-            if header.len() < 16 || &header[0..4] != MAGIC {
+            if &header[0..4] != MAGIC {
+                if !hinted_foreign {
+                    emit_hint(&app, "notDbi");
+                    hinted_foreign = true;
+                }
                 continue;
+            }
+
+            if !dbi_seen {
+                dbi_seen = true;
+                emit_log(&app, "Switch connected!", "success");
+                emit_connection(&app, true);
             }
 
             let _cmd_type = u32::from_le_bytes(header[4..8].try_into().unwrap());
@@ -449,13 +543,8 @@ pub fn run_server(
                     }
                 }
                 CMD_ID_FILE_RANGE => {
-                    match process_file_range_command(
-                        &mut usb,
-                        data_size,
-                        &files,
-                        &app,
-                        &stop_flag,
-                    ) {
+                    match process_file_range_command(&mut usb, data_size, &files, &app, &stop_flag)
+                    {
                         Ok(bytes_sent) => {
                             stats.record(bytes_sent);
                         }

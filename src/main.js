@@ -91,6 +91,10 @@ listen('connection-status', (event) => {
   statusText.textContent = isConnected ? t('status.connected') : t('status.disconnected');
 });
 
+listen('hint', (event) => {
+  appendLog(t(`hint.${event.payload.key}`), 'warn');
+});
+
 listen('file-list-sent', () => {
   appendLog(t('log.selectOnSwitch'), 'warn');
   transferInfo.textContent = t('info.waitingForSwitch');

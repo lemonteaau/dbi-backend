@@ -30,6 +30,8 @@ const translations = {
     'log.stopping': '正在停止服务...',
     'log.selectOnSwitch': '下一步：请在 Switch 的 DBI 里勾选要安装的游戏并开始安装，之后才会开始传输。',
     'info.waitingForSwitch': '等待在 Switch 上选择游戏并开始安装…',
+    'hint.noDbiCommand': '已识别到 Switch 的 USB 设备，但 DBI 还没有发来指令。请确认 Switch 上打开的是 DBI，并已进入"从DBIbackend安装"界面（不是 MTP 模式，也不是其他安装软件）。',
+    'hint.notDbi': '收到的不是 DBI 的数据：Switch 上可能开着其他 USB 安装软件（如 Goldleaf、Tinfoil）。请改用 DBI 的"从DBIbackend安装"。',
   },
   en: {
     'header.subtitle': 'Switch USB Installer',
@@ -55,6 +57,8 @@ const translations = {
     'log.stopping': 'Stopping server...',
     'log.selectOnSwitch': 'Next: in DBI on your Switch, select the games to install and start the installation. The transfer begins after that.',
     'info.waitingForSwitch': 'Waiting for you to select games and start the install on the Switch…',
+    'hint.noDbiCommand': 'Found the Switch USB device, but DBI has not sent any command yet. Make sure DBI is open on the Switch and in "Install from DBIbackend" (not MTP mode or another installer).',
+    'hint.notDbi': 'Received data that is not from DBI: another USB installer (e.g. Goldleaf, Tinfoil) may be running on the Switch. Use "Install from DBIbackend" in DBI instead.',
   },
 };
 
